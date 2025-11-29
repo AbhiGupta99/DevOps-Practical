@@ -1,0 +1,98 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  APP_DIR: /home/ec2-user/DevOps-Practical
+  BACKEND_IMAGE: ${{ abhigupta01 }}/backend
+  FRONTEND_IMAGE: ${{ abhigupta01 }}/frontend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (optional)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ abhigupta01 }}
+          password: ${{ LOVElove@123 }}
+
+      - name: Build & push backend image (latest + sha)
+        run: |
+          TAG=${{ github.sha }}
+          docker build -t "${{ env.BACKEND_IMAGE }}:latest" -t "${{ env.BACKEND_IMAGE }}:${TAG}" ./backend
+          docker push "${{ env.BACKEND_IMAGE }}:latest"
+          docker push "${{ env.BACKEND_IMAGE }}:${TAG}"
+
+      - name: Build & push frontend image (latest + sha)
+        run: |
+          TAG=${{ github.sha }}
+          docker build -t "${{ env.FRONTEND_IMAGE }}:latest" -t "${{ env.FRONTEND_IMAGE }}:${TAG}" ./frontend
+          docker push "${{ env.FRONTEND_IMAGE }}:latest"
+          docker push "${{ env.FRONTEND_IMAGE }}:${TAG}"
+
+      - name: Deploy to VM via SSH (pull images & restart using sudo for Amazon Linux 2023)
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ 13.201.85.65 }}
+          username: ${{ ec2-user }}
+          key: ${{ -----BEGIN RSA PRIVATE KEY-----
+MIIEogIBAAKCAQEAxrxaketT8Ck1f6Djlbkc8u44NzvLHD3czIfl/n/4lyCRSQtK
+jYs/WlDuq7VFakhseEDzuaiTNRJLC4qeEieOhzhyJKsaHEMgsl202PpNoaQYcODF
+aL4IJYIqchQFkrs18oWaAna3Wt3rEJbl7DZCRE6blLtfxhzNIKNs0J73nN722nQf
+Qi/HzIdGO1lQ3HbkyLbtBlBP5VvF3Xc7H5qsQRk817S1x3YOcM0R77sVAVDoHUkD
+KJ2lkMhxxax98P/g4oliNRXeeIZS7aqT4iotic6hPSn/qWr1MVcot+Kn2OtT4tFy
+nCzSiPnFHWjzpluitrtpZq9MnyFw+X+4spZPewIDAQABAoIBAGZ0D9UOFrXG6Nel
+H+6+AdiTStPetXUXx06B+OXdH1D57yxS79pMoRp0grZuuxxxvcm44m0iJNHFXn7S
+tW7yiZ3YUa/prYpIaQDLIkKBt6fPKvJ2Tg8TeKutkShCfiUI8mTWz3DZtujXYymo
+QVwnFL6WL8rbViKSEoXy+lQKv+hUeLUDWjX9cHu413F/s3DKDEjEjCoRv213v+Qb
+FQKNjAlVitd0+022Pk0c+ffZJQWzdSVWn4jhucesOHznR7/zQqfIDN9mJjDYi692
+hO+s4OvOlvnSPMkum55Sgz6ETq0fLxD5mxiDXYjxAN2tpJVBpH8wa7vmM1Bwj4Q8
+oc1TypECgYEA8CCVhl0OOpxXDd1J5PmNv4vys4HhifphOTbduttDOfdew00WegUL
+eD2eNeUT6MaMc8dY08E5w2Lgy2tNrI7C8jLb+Ls+apsqvbz6h5K7AnsCcqMHQv8S
+1XeDa0CjM6tRqXSLNhOY3W44i1qvSXdIxAud5v0GYPBoIvQgAZv/yh0CgYEA099Y
+bYN3AKOrJGwCMykUHVnbNOAdxxc4VoVjrhS1K7VL0UL4aQzTsjmVZlzqsX0+ybVd
+srBB15dRSd+fgZpJKD/J3d1KeeN1lVd3O2C2IX2Elm+DS4Nq7JqMPu9/+Kz48FX+
+As9rndgiAHj7JOVU5gbteo94V5sdgTSzCGAuDHcCgYBofWVTcI7OhlWDXPXYw5cg
+8N8Nqcjg56kC4pMdyme4g6IizhqnwiY5jmaYATTmp+9aOja2/nAKS66SFgFYw06l
+YehClggVD6xLoD5MXFcwPyLTi4mPZ7tkVHtFYn0h8Ly6RlKFl4V/ZYUJbs6z40ow
+tPVjHFt4N2S5QQ3kZWOrKQKBgHQePkqW+IujJ9LoVzRO2TVU3+zUv70znq7coEry
+EnEIBauEtrxsSUGuiZD2b7Ii4FyQR+/85bkQt35zTuoq8tlaTHqKI5016mWU8EXc
+tTUZo6cHKsAiIGHYOfDsNgjGVBD0MCi+IU76+3ei1pHcFnGTbmfzZZMt8jez+EMo
+41P1AoGAW6+xuFMW5XnvmTMXsNfTFeXTir/9H3l/HmVvjUDSJm++D6oA3ktqGrxZ
+R1BkszIlPrcDBbQYbmKMxVdTYQDSM+WwE3Io6Yepz103KRSb9KQtYV1sV0WsdjBC
+sKh8ryRWT+4LwCkuWxxzmbjxvVP9qyXexOwsSthQ9PCl0ouBy1g=
+-----END RSA PRIVATE KEY----- }}
+          script: |
+            set -euo pipefail
+
+            echo "=== remote: show user & path ==="
+            whoami
+            pwd
+
+            echo "=== remote: ensure APP_DIR exists and show files ==="
+            cd "${{ env.APP_DIR }}" || ( echo "APP_DIR missing: ${APP_DIR}"; exit 2 )
+            pwd
+            ls -la
+
+            echo "=== remote: ensure docker running ==="
+            sudo systemctl start docker || true
+            sudo systemctl enable --now docker || true
+
+            echo "=== remote: versions ==="
+            sudo docker --version || true
+            sudo docker compose version || sudo docker-compose --version || true
+
+            echo "=== remote: pulling images and restarting compose ==="
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
+            sudo docker compose ps --all
